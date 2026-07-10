@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pdfplumber
+pandas
+paddleocr
+paddlepaddle
+sentence-transformers
+chromadb
+neo4j
+groq
+python-dotenv
+pillow
+opencv-python
