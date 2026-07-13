@@ -1,0 +1,13 @@
+Equipment_ID,Tag_Number,Equipment_Name,Equipment_Type,Location,Unit,Manufacturer,Model,Commissioned_Date,Design_Pressure_bar,Design_Temp_C,Last_Inspection_Date,Next_Inspection_Due,Status,Criticality,OEM_Manual_Ref
+EQ-001,P-104,Cooling Water Pump 104,Centrifugal Pump,Building C - Ground Floor,Unit 3,Kirloskar Brothers Ltd,KDS-450,2018-06-15,12.5,85,2024-01-10,2024-07-10,Operational,Critical,OEM-KBL-KDS450-001
+EQ-002,P-105,Cooling Water Pump 105,Centrifugal Pump,Building C - Ground Floor,Unit 3,Kirloskar Brothers Ltd,KDS-450,2018-06-15,12.5,85,2023-11-20,2024-05-20,Under Maintenance,Critical,OEM-KBL-KDS450-001
+EQ-003,V-22,Steam Pressure Vessel 22,Pressure Vessel,Building D - Level 1,Unit 3,BHEL,PV-800S,2017-03-20,25.0,220,2023-08-15,2024-02-15,Operational,Critical,OEM-BHEL-PV800S-003
+EQ-004,V-23,Steam Pressure Vessel 23,Pressure Vessel,Building D - Level 1,Unit 3,BHEL,PV-800S,2017-03-20,25.0,220,2024-02-01,2024-08-01,Operational,Critical,OEM-BHEL-PV800S-003
+EQ-005,HX-11,Heat Exchanger 11,Shell & Tube HX,Building C - Level 2,Unit 3,Thermax Ltd,STX-200,2019-01-10,15.0,150,2023-12-05,2024-06-05,Operational,High,OEM-TML-STX200-002
+EQ-006,HX-12,Heat Exchanger 12,Shell & Tube HX,Building C - Level 2,Unit 3,Thermax Ltd,STX-200,2019-01-10,15.0,150,2024-01-22,2024-07-22,Operational,High,OEM-TML-STX200-002
+EQ-007,MV-31,Motor Control Valve 31,Control Valve,Building C - Ground Floor,Unit 3,L&T Valves,CV-150N,2018-09-05,12.5,85,2023-10-18,2024-04-18,Operational,Medium,OEM-LTV-CV150N-004
+EQ-008,CV-44,Check Valve 44,Non-Return Valve,Building C - Ground Floor,Unit 3,Leader Valves,NRV-80,2018-09-05,12.5,85,2023-10-18,2024-04-18,Operational,Low,OEM-LDR-NRV80-005
+EQ-009,CT-01,Cooling Tower 01,Induced Draft Cooling Tower,Open Yard,Unit 3,Paharpur Cooling,IDC-5000,2018-03-01,Atmospheric,55,2024-03-01,2024-09-01,Operational,Critical,OEM-PAH-IDC5000-006
+EQ-010,BL-07,Boiler 07,Fire Tube Boiler,Building B - Ground Floor,Unit 3,Thermax Ltd,FTB-1000,2016-11-30,32.0,250,2023-07-10,2024-01-10,Operational,Critical,OEM-TML-FTB1000-007
+EQ-011,AG-03,Air Compressor 03,Reciprocating Compressor,Utility Room,Unit 3,Ingersoll Rand,SSR-UP6-50,2020-02-14,8.5,45,2024-02-28,2024-08-28,Operational,Medium,OEM-IR-SSR-008
+EQ-012,TK-09,Chemical Dosing Tank 09,Storage Tank,Building C - Ground Floor,Unit 3,Forbes Marshall,FMT-500,2018-06-15,3.0,60,2024-01-15,2024-07-15,Operational,Medium,OEM-FM-FMT500-009

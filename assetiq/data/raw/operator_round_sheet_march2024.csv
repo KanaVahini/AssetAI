@@ -1,0 +1,42 @@
+Date,Time,Operator,Equipment,Suction_Pressure_bar,Discharge_Pressure_bar,Flow_m3hr,Bearing_Temp_DE_C,Bearing_Temp_NDE_C,Motor_Current_A,Vibration_mms,Seal_Quench_LPM,Remarks
+2024-03-01,06:00,Prakash Tiwari,P-104,1.4,4.8,435,58,52,41,2.1,2.8,Normal
+2024-03-01,06:00,Prakash Tiwari,P-105,,,,,,,,,Standby - discharge valve closed
+2024-03-01,08:00,Prakash Tiwari,P-104,1.4,4.9,440,59,53,41,2.2,2.8,Normal
+2024-03-01,10:00,Prakash Tiwari,P-104,1.3,4.8,432,61,54,42,2.3,2.9,Normal
+2024-03-01,12:00,Sanjay Patil,P-104,1.3,4.7,428,63,55,42,2.4,2.8,Slight increase in bearing temp noted - within limits
+2024-03-01,14:00,Sanjay Patil,P-104,1.4,4.8,438,64,55,42,2.3,2.8,Normal
+2024-03-01,16:00,Sanjay Patil,P-104,1.4,4.8,435,65,56,43,2.4,2.9,Normal
+2024-03-01,18:00,Ramesh Yadav,P-104,1.3,4.7,430,65,56,43,2.5,2.8,Normal
+2024-03-01,20:00,Ramesh Yadav,P-104,1.3,4.7,428,66,57,43,2.6,2.8,Bearing temp trending up slightly
+2024-03-01,22:00,Ramesh Yadav,P-104,1.4,4.8,435,67,57,43,2.6,2.9,
+2024-03-02,00:00,Ramesh Yadav,P-104,1.4,4.8,440,68,58,44,2.7,2.9,
+2024-03-02,02:00,Ramesh Yadav,P-104,1.4,4.9,442,68,58,44,2.7,2.8,
+2024-03-02,04:00,Ramesh Yadav,P-104,1.3,4.8,436,69,59,44,2.8,2.8,
+2024-03-02,06:00,Prakash Tiwari,P-104,1.3,4.7,430,70,59,44,2.9,2.8,Bearing temp 70°C - reported to shift supervisor verbally
+2024-03-02,08:00,Prakash Tiwari,P-104,1.4,4.8,438,70,60,45,2.9,2.9,
+2024-03-02,10:00,Prakash Tiwari,P-104,1.4,4.8,440,71,60,45,3.0,2.8,
+2024-03-02,12:00,Sanjay Patil,P-104,1.3,4.7,432,72,61,45,3.1,2.8,Bearing temp 72°C - approaching warning. Will monitor closely.
+2024-03-02,14:00,Sanjay Patil,P-104,1.4,4.8,435,73,62,46,3.2,2.9,
+2024-03-02,16:00,Sanjay Patil,P-104,1.4,4.9,442,74,62,46,3.3,2.9,Temp rising. Informed Rajan Kumar (technician)
+2024-03-02,18:00,Ramesh Yadav,P-104,1.4,4.8,438,74,63,46,3.4,2.8,Rajan Kumar visited and checked - said will monitor
+2024-03-02,20:00,Ramesh Yadav,P-104,1.3,4.7,430,75,63,46,3.5,2.8,ALARM TRIGGERED - 75°C. Shift supervisor Suresh Nair informed.
+2024-03-02,22:00,Ramesh Yadav,P-104,1.4,4.8,435,75,63,47,3.6,2.9,Running on alarm. P-105 being prepared for start.
+2024-03-03,00:00,Ramesh Yadav,P-104,1.4,4.8,440,76,64,47,3.7,2.8,
+2024-03-03,02:00,Ramesh Yadav,P-104,1.4,4.9,442,77,65,47,3.8,2.8,
+2024-03-03,04:00,Ramesh Yadav,P-104,1.3,4.7,432,77,65,48,4.0,2.8,Vibration also rising
+2024-03-03,06:00,Prakash Tiwari,P-104,1.3,4.7,428,78,66,48,4.1,2.8,Temp 78°C. Per SOP-CW-003 Section 4.5 - initiating emergency stop
+2024-03-03,06:15,Prakash Tiwari,P-105,1.4,4.8,430,45,40,40,2.0,2.9,P-105 started successfully
+2024-03-03,06:20,Prakash Tiwari,P-104,,,,,,,,,TRIPPED - Emergency stop per SOP. Breakdown WO raised.
+2024-03-04,06:00,Prakash Tiwari,P-105,1.4,4.9,442,46,41,40,2.1,2.9,Normal
+2024-03-05,06:00,Prakash Tiwari,P-105,1.4,4.8,438,47,41,41,2.1,2.9,Normal
+2024-03-05,14:35,Prakash Tiwari,P-105,1.4,4.8,440,47,41,40,2.1,2.9,
+2024-03-06,06:00,Prakash Tiwari,P-104,1.4,4.9,445,55,48,41,2.0,2.9,P-104 recommissioned after bearing replacement (WO-2024-008). Running OK.
+2024-03-06,06:00,Prakash Tiwari,P-105,,,,,,,,,Standby
+2024-03-07,06:00,Prakash Tiwari,P-104,1.4,4.8,440,56,49,41,2.0,2.9,Normal
+2024-03-08,06:00,Sanjay Patil,P-104,1.4,4.8,438,57,49,41,2.1,2.9,Normal
+2024-03-09,06:00,Sanjay Patil,P-104,1.4,4.9,442,57,49,42,2.1,2.9,Normal
+2024-03-10,06:00,Ramesh Yadav,P-104,1.4,4.8,440,58,50,41,2.2,2.9,Normal - bearing temp stable post repair
+2024-03-15,06:00,Prakash Tiwari,P-104,1.4,4.8,438,59,50,42,2.2,2.9,Normal
+2024-03-20,06:00,Sanjay Patil,P-104,1.4,4.8,440,60,51,42,2.2,2.9,Normal. Monthly lubrication due in 14 days per new schedule.
+2024-03-25,06:00,Ramesh Yadav,P-104,1.4,4.9,442,61,51,42,2.3,2.9,Normal
+2024-03-31,06:00,Prakash Tiwari,P-104,1.4,4.8,440,62,52,42,2.3,2.9,Normal

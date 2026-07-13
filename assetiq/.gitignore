@@ -2,8 +2,6 @@
 __pycache__
 *.pyc
 node_modules
-data/raw
-data/processed
 data/chroma_db
 *.db
 .DS_Store
