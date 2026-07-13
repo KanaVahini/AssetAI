@@ -1,8 +1,12 @@
 import json
+import os
 from groq import Groq
-from prompts import EXTRACTION_PROMPT
+from dotenv import load_dotenv
+from backend.entity_extraction.prompts import EXTRACTION_PROMPT
 
-client = Groq(api_key="your_groq_key_here")
+load_dotenv()
+
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def extract_entities(text):
     # Don't send huge texts — take first 2000 chars
@@ -21,11 +25,11 @@ def extract_entities(text):
     
     # Clean and parse JSON
     try:
-        # Remove any markdown if present
         raw = raw.replace("```json","").replace("```","").strip()
         return json.loads(raw)
-    except:
-        # If parsing fails return empty
+    except Exception as e:
+        print(f"JSON parsing failed: {e}")
+        print(f"Raw response was: {raw}")
         return {
             "equipment_tags": [],
             "dates": [],
