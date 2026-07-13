@@ -1,4 +1,5 @@
-# Generic schema — works for any plant
+# Defines what nodes and edges exist in the knowledge graph
+# Generic — works for any plant
 
 NODE_TYPES = {
     "Plant": {
@@ -7,7 +8,7 @@ NODE_TYPES = {
     },
     "Equipment": {
         "required": ["tag"],
-        "optional": ["name", "type", "location", 
+        "optional": ["name", "type", "location",
                      "manufacturer", "model", "status"]
     },
     "Document": {
@@ -25,15 +26,20 @@ NODE_TYPES = {
     "FailureMode": {
         "required": ["name"],
         "optional": ["category", "severity"]
+    },
+    "Location": {
+        "required": ["name"],
+        "optional": ["plant", "building", "floor"]
     }
 }
 
 EDGE_TYPES = [
-    "BELONGS_TO",      # Equipment/Document → Plant
-    "MENTIONED_IN",    # Equipment → Document
-    "MAINTAINED_BY",   # Equipment → Person
-    "HAD_FAILURE",     # Equipment → FailureMode
-    "COMPLIES_WITH",   # Document → Regulation
-    "WORKED_ON",       # Person → Equipment
-    "REFERENCES",      # Document → Document
+    "BELONGS_TO",       # Equipment/Document → Plant
+    "MENTIONED_IN",     # Equipment → Document
+    "MAINTAINED_BY",    # Equipment → Person
+    "HAD_FAILURE",      # Equipment → FailureMode
+    "COMPLIES_WITH",    # Document → Regulation
+    "WORKED_ON",        # Person → Equipment
+    "REFERENCES",       # Document → Document
+    "LOCATED_IN",       # Equipment → Location
 ]

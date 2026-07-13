@@ -1,4 +1,8 @@
 import json
+import os
+import sys
+sys.path.append(os.path.dirname(__file__))
+
 from neo4j_connector import (
     create_plant_node,
     create_equipment_node,
@@ -6,68 +10,102 @@ from neo4j_connector import (
     create_person_node,
     create_regulation_node,
     create_failure_node,
-    link_nodes
+    create_location_node,
+    link_nodes,
+    close
 )
 
-def build_graph(input_path="data/processed/cleaned_documents.jsonl"):
-    
+INPUT_PATH = "data/processed/cleaned_documents.jsonl"
+
+
+def build_graph(input_path=INPUT_PATH):
+
     with open(input_path) as f:
         documents = [json.loads(line) for line in f]
-    
+
+    print(f"Building graph for {len(documents)} documents...\n")
+
     for doc in documents:
-        print(f"Building graph for: {doc['filename']}")
-        
+        filename   = doc["filename"]
+        doc_id     = doc["doc_id"]
+        doc_type   = doc.get("doc_type", "unknown")
         plant_name = doc.get("plant_name", "Unknown Plant")
-        
-        # 1. Create plant node (MERGE — won't duplicate)
+        entities   = doc.get("entities", [])
+
+        print(f"Processing: {filename}")
+
+        # 1. Create Plant node
         create_plant_node(plant_name)
-        
-        # 2. Create document node
-        create_document_node(
-            doc_id=doc["doc_id"],
-            filename=doc["filename"],
-            doc_type=doc.get("doc_type", "unknown"),
-            plant_name=plant_name
-        )
-        
-        # 3. Link document to plant
+
+        # 2. Create Document node
+        create_document_node(doc_id, filename, doc_type, plant_name)
+
+        # 3. Link Document → Plant
         link_nodes(
-            from_label="Document",
-            from_key="doc_id",
-            from_val=doc["doc_id"],
-            edge_type="BELONGS_TO",
-            to_label="Plant",
-            to_key="name",
-            to_val=plant_name
+            "Document", "doc_id",  doc_id,
+            "BELONGS_TO",
+            "Plant",    "name",    plant_name
         )
-        
+
         # 4. Process each entity
-        for entity in doc.get("entities", []):
-            etype = entity["type"]
-            evalue = entity["value"]
-            
+        for entity in entities:
+            etype = entity.get("type")
+            evalue = entity.get("value", "").strip()
+
+            if not evalue:
+                continue
+
+            # Equipment
             if etype == "equipment_tag":
                 create_equipment_node(evalue, plant_name)
-                link_nodes("Equipment","tag",evalue,
-                           "MENTIONED_IN","Document","doc_id",doc["doc_id"])
-                link_nodes("Equipment","tag",evalue,
-                           "BELONGS_TO","Plant","name",plant_name)
-            
+                link_nodes(
+                    "Equipment", "tag",    evalue,
+                    "MENTIONED_IN",
+                    "Document",  "doc_id", doc_id
+                )
+                link_nodes(
+                    "Equipment", "tag",  evalue,
+                    "BELONGS_TO",
+                    "Plant",     "name", plant_name
+                )
+
+            # Person
             elif etype == "person":
                 create_person_node(evalue)
-                link_nodes("Person","name",evalue,
-                           "WORKED_ON","Plant","name",plant_name)
-            
+                link_nodes(
+                    "Person",   "name",  evalue,
+                    "WORKED_ON",
+                    "Plant",    "name",  plant_name
+                )
+
+            # Regulation
             elif etype == "regulatory_reference":
                 create_regulation_node(evalue)
-                link_nodes("Document","doc_id",doc["doc_id"],
-                           "COMPLIES_WITH","Regulation","code",evalue)
-            
+                link_nodes(
+                    "Document",   "doc_id", doc_id,
+                    "COMPLIES_WITH",
+                    "Regulation", "code",   evalue
+                )
+
+            # Failure Mode
             elif etype == "failure_mode":
                 create_failure_node(evalue)
-    
-    print("\n✅ Knowledge graph built successfully!")
-    print("Open Neo4j Browser and run: MATCH (n) RETURN n LIMIT 50")
+
+            # Location
+            elif etype == "location":
+                create_location_node(evalue)
+                link_nodes(
+                    "Location", "name",   evalue,
+                    "BELONGS_TO",
+                    "Plant",    "name",   plant_name
+                )
+
+        print(f"  ✅ {len(entities)} entities added to graph")
+
+    close()
+    print("\n🎉 Knowledge graph built successfully!")
+    print("Open Neo4j Browser and run:")
+    print("  MATCH (n) RETURN n LIMIT 100")
 
 
 if __name__ == "__main__":

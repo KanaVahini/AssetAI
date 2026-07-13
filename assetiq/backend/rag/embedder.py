@@ -1,7 +1,10 @@
-"""
-Embedder utilities for creating vector embeddings.
-"""
+from sentence_transformers import SentenceTransformer
 
-def embed_text(text, model_name):
-    """Placeholder: return embedding for `text`."""
-    pass
+# Load once — reused for all documents
+model = SentenceTransformer('BAAI/bge-small-en')
+
+def embed(texts):
+    """
+    Converts list of text strings into vectors.
+    """
+    return model.encode(texts).tolist()
