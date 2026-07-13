@@ -35,6 +35,6 @@ def clean_all_documents(input_path, output_path):
 
 if __name__ == "__main__":
     clean_all_documents(
-        input_path="data/processed/ingested_output.jsonl",
-        output_path="data/processed/cleaned_documents.jsonl"
-    )
+    input_path="data/processed/extracted_documents.jsonl",  # ← this
+    output_path="data/processed/cleaned_documents.jsonl"
+)
