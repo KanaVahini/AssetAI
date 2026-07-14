@@ -4,11 +4,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-URI      = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+URI = os.getenv("NEO4J_URI", "neo4j://127.0.0.1:7687")
 USER     = os.getenv("NEO4J_USER", "neo4j")
 PASSWORD = os.getenv("NEO4J_PASSWORD", "password123")
 
-driver = GraphDatabase.driver(URI, auth=(USER, PASSWORD))
+driver = GraphDatabase.driver(
+    URI,
+    auth=(USER, PASSWORD),
+    encrypted=False
+)
 
 
 def run_query(query, params={}):
