@@ -64,7 +64,7 @@ def save_output(documents, output_path):
 
 if __name__ == "__main__":
     documents = ingest_folder(
-        folder_path="data/raw",
+        folder_path="../../data/raw",
         plant_name="Bharat Process Industries"
     )
-    save_output(documents, "data/processed/ingested_output.jsonl")
+    save_output(documents, "../../data/processed/ingested_output.jsonl")

@@ -1,6 +1,8 @@
 import os
 import sys
 
+from typing import Optional
+
 from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel
 import shutil
@@ -10,15 +12,15 @@ sys.path.append(os.path.abspath("backend/agents/copilot"))
 sys.path.append(os.path.abspath("backend/agents/rca"))
 sys.path.append(os.path.abspath("backend/rag"))
 
-import copilot_agent
-import rca_agent
+from agents.copilot import copilot_agent
+from agents.rca import rca_agent
 
 router = APIRouter()
 
 
 class QueryRequest(BaseModel):
     question: str
-    plant_name: str = None
+    plant_name: Optional[str] = None
 
 
 class RCARequest(BaseModel):

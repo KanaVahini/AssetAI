@@ -1,7 +1,15 @@
 import os
 import sys
-sys.path.append(os.path.dirname(__file__))
-sys.path.append("backend/rag")
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+RAG_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "rag"))
+
+os.chdir(os.path.join(os.path.dirname(__file__), "../../.."))
+sys.path.insert(0, os.path.abspath("backend/rag"))
+sys.path.insert(1, os.path.abspath("backend/knowledge_graph"))
+
+sys.path.append(RAG_DIR)
+
 
 from groq import Groq
 from dotenv import load_dotenv

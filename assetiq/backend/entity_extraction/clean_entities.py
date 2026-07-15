@@ -1,5 +1,9 @@
+import os
 import json
 from normalizer import normalize_all_entities
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 
 def clean_all_documents(input_path, output_path):
     cleaned_docs = []
@@ -35,6 +39,7 @@ def clean_all_documents(input_path, output_path):
 
 if __name__ == "__main__":
     clean_all_documents(
-    input_path="data/processed/extracted_documents.jsonl",  # ← this
-    output_path="data/processed/cleaned_documents.jsonl"
+    
+input_path = os.path.join(PROJECT_ROOT, "data", "processed", "extracted_documents.jsonl"),  # ← this
+    output_path = os.path.join(PROJECT_ROOT, "data", "processed", "cleaned_documents.jsonl")
 )

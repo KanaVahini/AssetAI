@@ -15,7 +15,16 @@ from neo4j_connector import (
     close
 )
 
-INPUT_PATH = "data/processed/cleaned_documents.jsonl"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))   
+
+INPUT_PATH =os.path.join(
+    BASE_DIR,
+    "..",
+    "..",
+    "data",
+    "processed",
+    "cleaned_documents.jsonl"
+)
 
 
 def build_graph(input_path=INPUT_PATH):

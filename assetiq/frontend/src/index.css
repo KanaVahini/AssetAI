@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* ── Material palette — plant-at-night, not flat SaaS dark mode ── */
+  --bg-deep: #070E14;
+  --bg-gradient:
+    radial-gradient(1100px 780px at 12% 8%, rgba(35, 92, 89, 0.55) 0%, rgba(35, 92, 89, 0) 55%),
+    radial-gradient(900px 700px at 85% 82%, rgba(199, 123, 44, 0.14) 0%, rgba(199, 123, 44, 0) 60%),
+    linear-gradient(165deg, #0D2224 0%, #0A1A26 42%, #070E14 100%);
+
+  --panel-gradient: linear-gradient(160deg, rgba(29, 63, 65, 0.42) 0%, rgba(11, 26, 36, 0.86) 60%);
+  --panel-gradient-raised: linear-gradient(160deg, rgba(38, 78, 79, 0.5) 0%, rgba(16, 34, 46, 0.9) 60%);
+  --panel-solid: #10222E;
+
+  --border: rgba(150, 190, 187, 0.14);
+  --border-strong: rgba(178, 212, 208, 0.26);
+
+  /* Brass / copper — the primary signal accent (control-room hardware, not UI-blue) */
+  --brass-1: #F0B65B;
+  --brass-2: #C77B2C;
+  --gradient-brass: linear-gradient(135deg, var(--brass-1), var(--brass-2));
+  --brass-solid: #E0A24E;
+  --brass-dim: rgba(224, 162, 78, 0.15);
+
+  /* Oxidised status colors — verdigris (healthy) / rust (alert) instead of stock green/red */
+  --verdigris: #4FBFA8;
+  --verdigris-dim: rgba(79, 191, 168, 0.14);
+  --rust: #C4573A;
+  --rust-dim: rgba(196, 87, 58, 0.15);
+
+  --text-primary: #EDF4F2;
+  --text-muted: #8FAEAC;
+  --text-faint: #55787A;
+
+  --font-display: 'Big Shoulders Display', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-gradient) var(--bg-deep);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Film-grain texture — keeps gradients from reading as flat vector fills */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Blueprint grid — subtle technical-drawing backdrop */
+.blueprint-grid {
+  background-image:
+    linear-gradient(rgba(150, 190, 187, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(150, 190, 187, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Hazard trim — a physical detail borrowed from plant safety signage,
+   used once, consistently, as a panel edge (not scattered as decoration) */
+.hazard-trim {
+  height: 4px;
+  width: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--brass-1) 0px, var(--brass-1) 8px,
+    #1a1408 8px, #1a1408 16px
+  );
+  opacity: 0.55;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: 4px;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+textarea, input {
+  font-family: inherit;
+}
+
+textarea:focus-visible,
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--brass-solid);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

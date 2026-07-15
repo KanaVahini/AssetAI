@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROMPT = """
 You are an industrial document analyst.
 Read the text below and extract these entities.
@@ -65,8 +65,23 @@ def extract_entities_from_text(text):
 
 
 def run_extraction(
-    input_path="data/processed/ingested_output.jsonl",
-    output_path="data/processed/extracted_documents.jsonl"
+    input_path = os.path.join(
+    BASE_DIR,
+    "..",
+    "..",
+    "data",
+    "processed",
+    "ingested_output.jsonl",
+),
+   output_path = os.path.join(
+    BASE_DIR,
+    "..",
+    "..",
+    "data",
+    "processed",
+    "extracted_documents.jsonl",
+)
+
 ):
     with open(input_path) as f:
         documents = [json.loads(line) for line in f]

@@ -11,8 +11,17 @@ from embedder import embed
 client = chromadb.PersistentClient(path="data/chroma_db")
 collection = client.get_or_create_collection("assetiq")
 
-INPUT_PATH = "data/processed/cleaned_documents.jsonl"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 
+INPUT_PATH = os.path.join(
+    PROJECT_ROOT,
+    "data",
+    "processed",
+    "cleaned_documents.jsonl"
+)
+output_dir = os.path.join(PROJECT_ROOT, "data", "vector_store")
+os.makedirs(output_dir, exist_ok=True)
 
 def build_vector_store(input_path=INPUT_PATH):
     with open(input_path) as f:
@@ -92,3 +101,4 @@ def search(query, plant_name=None, top_k=5):
 
 if __name__ == "__main__":
     build_vector_store()
+
