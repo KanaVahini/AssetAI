@@ -11,3 +11,4 @@ groq
 python-dotenv
 pillow
 opencv-python
+python-multipart
