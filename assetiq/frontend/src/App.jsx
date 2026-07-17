@@ -5,6 +5,7 @@ import Copilot from './pages/Copilot'
 import Upload from './pages/Upload'
 import Sidebar from './components/Sidebar'
 import './styles/app.css'
+import RCA from './pages/RCA'
 
 const pageVariants = {
   initial: { opacity: 0, y: 10 },
@@ -34,6 +35,7 @@ function AnimatedRoutes() {
         <Route path="/" element={<Page><Home /></Page>} />
         <Route path="/copilot" element={<Page><Copilot /></Page>} />
         <Route path="/upload" element={<Page><Upload /></Page>} />
+        <Route path="/rca" element={<Page><RCA /></Page>} />
       </Routes>
     </AnimatePresence>
   )

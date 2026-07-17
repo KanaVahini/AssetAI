@@ -16,6 +16,7 @@ export default function Sidebar() {
     { path: '/', label: 'Home', icon: '⌂' },
     { path: '/copilot', label: 'Copilot', icon: '◈' },
     { path: '/upload', label: 'Upload', icon: '⇧' },
+    { path: '/rca', label: 'RCA', icon: '⚡' },
   ]
 
   return (

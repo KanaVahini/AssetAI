@@ -35,6 +35,9 @@
   --font-display: 'Big Shoulders Display', sans-serif;
   --font-body: 'IBM Plex Sans', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
+
+  --accent-critical: #C084FC;
+--accent-critical-dim: rgba(192, 132, 252, 0.14);
 }
 
 * {

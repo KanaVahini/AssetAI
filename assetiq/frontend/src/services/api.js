@@ -52,3 +52,10 @@ export const getStatus = async () => {
   return response.data
 }
 
+// POST /rca
+export const runRCA = async (equipmentTag) => {
+  const response = await api.post("/rca", {
+    equipment_tag: equipmentTag
+  })
+  return response.data
+}
