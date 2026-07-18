@@ -119,3 +119,37 @@ def build_graph(input_path=INPUT_PATH):
 
 if __name__ == "__main__":
     build_graph()
+
+
+def build_graph_for_doc(doc):
+    """Add a single document to existing graph."""
+    plant_name = doc.get("plant_name", "Unknown Plant")
+
+    create_plant_node(plant_name)
+    create_document_node(
+        doc["doc_id"], doc["filename"],
+        doc.get("doc_type", "unknown"), plant_name
+    )
+    link_nodes("Document", "doc_id", doc["doc_id"],
+               "BELONGS_TO", "Plant", "name", plant_name)
+
+    for entity in doc.get("entities", []):
+        etype  = entity.get("type")
+        evalue = entity.get("value", "").strip()
+        if not evalue:
+            continue
+
+        if etype == "equipment_tag":
+            create_equipment_node(evalue, plant_name)
+            link_nodes("Equipment", "tag", evalue,
+                       "MENTIONED_IN", "Document", "doc_id", doc["doc_id"])
+        elif etype == "person":
+            create_person_node(evalue)
+        elif etype == "regulatory_reference":
+            create_regulation_node(evalue)
+            link_nodes("Document", "doc_id", doc["doc_id"],
+                       "COMPLIES_WITH", "Regulation", "code", evalue)
+        elif etype == "failure_mode":
+            create_failure_node(evalue)
+        elif etype == "location":
+            create_location_node(evalue)

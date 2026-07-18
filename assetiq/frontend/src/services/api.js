@@ -59,3 +59,37 @@ export const runRCA = async (equipmentTag) => {
   })
   return response.data
 }
+
+// GET /safety
+// Output: { safety_report: string, sources: string[], generated_at: string }
+export const getSafetyReport = async () => {
+  const response = await api.get("/safety")
+  return response.data
+}
+
+// POST /safety/check
+// Input:  equipment tag string, e.g. "P-104"
+// Output: { answer: string, sources: string[] }
+export const checkEquipmentSafety = async (equipmentTag) => {
+  const response = await api.post("/safety/check", {
+    equipment_tag: equipmentTag
+  })
+  return response.data
+}
+
+// GET /summary
+// Output: { answer: string, sources: string[] }
+export const getFullSummary = async () => {
+  const response = await api.get("/summary")
+  return response.data
+}
+
+// POST /summary/document
+// Input:  topic string, e.g. "Pump P-104 maintenance history"
+// Output: { answer: string, sources: string[] }
+export const summarizeTopic = async (topic) => {
+  const response = await api.post("/summary/document", {
+    topic: topic
+  })
+  return response.data
+}

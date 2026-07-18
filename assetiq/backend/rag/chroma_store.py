@@ -102,3 +102,32 @@ def search(query, plant_name=None, top_k=5):
 if __name__ == "__main__":
     build_vector_store()
 
+
+def add_document(doc):
+    """Add a single new document to existing vector store."""
+    full_text = " ".join([
+        page["text"]
+        for page in doc.get("pages", [])
+        if page.get("text")
+    ])
+
+    if not full_text.strip():
+        return
+
+    chunks = chunk_text(full_text)
+    embeddings = embed(chunks)
+
+    for i, (chunk, emb) in enumerate(zip(chunks, embeddings)):
+        collection.add(
+            documents=[chunk],
+            embeddings=[emb],
+            metadatas=[{
+                "doc_id": doc["doc_id"],
+                "filename": doc["filename"],
+                "doc_type": doc.get("doc_type", "unknown"),
+                "plant_name": doc.get("plant_name", "unknown"),
+                "chunk_index": i
+            }],
+            ids=[f"{doc['doc_id']}_chunk{i}"]
+        )
+    print(f"  Added {len(chunks)} chunks for {doc['filename']}")

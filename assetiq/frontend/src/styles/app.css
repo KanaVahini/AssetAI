@@ -803,6 +803,105 @@
   font-weight: 600;
 }
 
+/* ── Safety & Summary pages ───────────────────────────────── */
+/* Both pages are built almost entirely from existing classes
+   (.copilot__panel, .msg-sources / SourceCard, .suggestion-chip,
+   .readout-strip, .btn--primary) — these are just the wrappers
+   and small context overrides needed to use them outside the
+   chat / hero layouts they were originally built for. */
+
+.intel-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 32px 60px;
+}
+
+.intel-page__subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 520px;
+  margin: 4px 0 0;
+  line-height: 1.6;
+}
+
+.intel-section {
+  margin-top: 28px;
+}
+
+.intel-section-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  margin: 0 0 14px;
+}
+
+/* Reused panel/input/suggestions outside the fixed-height chat layout */
+.copilot__panel--static {
+  height: auto;
+  flex: none;
+  padding: 20px;
+}
+.copilot__input-row--static {
+  padding: 0;
+  border-top: none;
+  margin-bottom: 14px;
+}
+.suggestions--static {
+  padding: 0 0 4px;
+}
+.readout-strip--static {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 24px;
+}
+
+.intel-card {
+  background: var(--panel-gradient-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+.intel-card--inline {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+.intel-card__body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: pre-line;
+}
+
+.intel-card__sources {
+  margin-bottom: 14px;
+}
+
+.intel-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.intel-card__loading {
+  padding: 8px 4px;
+}
+.intel-card__loading--inline {
+  margin-top: 16px;
+}
+
+.timestamp {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+  color: var(--text-faint);
+}
+
 /* ── Responsive ───────────────────────────────────────────── */
 
 @media (max-width: 720px) {
@@ -828,6 +927,9 @@
   }
   .rca-page {
     padding: 40px 24px;
+  }
+  .intel-page {
+    padding: 24px 16px 40px;
   }
   .rca__cards {
     grid-template-columns: 1fr;

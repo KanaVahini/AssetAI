@@ -3,9 +3,11 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Home from './pages/Home'
 import Copilot from './pages/Copilot'
 import Upload from './pages/Upload'
+import RCA from './pages/RCA'
+import Safety from './pages/Safety'
+import Summary from './pages/Summary'
 import Sidebar from './components/Sidebar'
 import './styles/app.css'
-import RCA from './pages/RCA'
 
 const pageVariants = {
   initial: { opacity: 0, y: 10 },
@@ -36,6 +38,8 @@ function AnimatedRoutes() {
         <Route path="/copilot" element={<Page><Copilot /></Page>} />
         <Route path="/upload" element={<Page><Upload /></Page>} />
         <Route path="/rca" element={<Page><RCA /></Page>} />
+        <Route path="/safety" element={<Page><Safety /></Page>} />
+        <Route path="/summary" element={<Page><Summary /></Page>} />
       </Routes>
     </AnimatePresence>
   )
