@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { getFullSummary, summarizeTopic } from '../services/api'
+import { getFullSummary, summarizeTopic, getCorpusStats } from '../services/api'
 import SourceCard from '../components/SourceCard'
 import Loader from '../components/Loader'
+import useEquipmentTags from '../hooks/useEquipmentTags'
 
 export default function Summary() {
   const [summary, setSummary] = useState(null)
@@ -12,6 +13,15 @@ export default function Summary() {
   const [topicResult, setTopicResult] = useState(null)
   const [topicLoading, setTopicLoading] = useState(false)
   const [topicError, setTopicError] = useState(null)
+
+  const [stats, setStats] = useState(null)
+  const { tags } = useEquipmentTags(2)
+
+  useEffect(() => {
+    getCorpusStats()
+      .then(setStats)
+      .catch(() => setStats(null))
+  }, [])
 
   const loadSummary = async () => {
     setSummaryLoading(true)
@@ -50,13 +60,13 @@ export default function Summary() {
     if (e.key === 'Enter') runTopicSummary()
   }
 
-  const suggestions = [
-    'P-104 maintenance history',
+  const genericSuggestions = [
     'Compliance and regulatory status',
     'All equipment failures',
-    'Near miss incidents',
-    'Boiler BL-07 status'
+    'Near miss incidents'
   ]
+  const tagSuggestions = tags.map(t => `${t} maintenance history`)
+  const suggestions = [...tagSuggestions, ...genericSuggestions]
 
   return (
     <div className="intel-page blueprint-grid">
@@ -66,22 +76,24 @@ export default function Summary() {
         <p className="intel-page__subtitle">Structured overview of all indexed plant documents.</p>
       </div>
 
-      <div className="readout-strip readout-strip--static">
-        <div className="readout">
-          <span className="readout__value">10</span>
-          <span className="readout__label">DOCUMENTS INDEXED</span>
+      {stats && (
+        <div className="readout-strip readout-strip--static">
+          <div className="readout">
+            <span className="readout__value">{stats.documents_indexed}</span>
+            <span className="readout__label">DOCUMENTS INDEXED</span>
+          </div>
+          <div className="readout-strip__divider" />
+          <div className="readout">
+            <span className="readout__value">{stats.entities_extracted}</span>
+            <span className="readout__label">ENTITIES EXTRACTED</span>
+          </div>
+          <div className="readout-strip__divider" />
+          <div className="readout">
+            <span className="readout__value">{stats.knowledge_chunks}</span>
+            <span className="readout__label">KNOWLEDGE CHUNKS</span>
+          </div>
         </div>
-        <div className="readout-strip__divider" />
-        <div className="readout">
-          <span className="readout__value">205</span>
-          <span className="readout__label">ENTITIES EXTRACTED</span>
-        </div>
-        <div className="readout-strip__divider" />
-        <div className="readout">
-          <span className="readout__value">26</span>
-          <span className="readout__label">KNOWLEDGE CHUNKS</span>
-        </div>
-      </div>
+      )}
 
       <div className="intel-section">
         <div className="copilot__panel copilot__panel--static">
@@ -130,7 +142,7 @@ export default function Summary() {
               value={topic}
               onChange={e => setTopic(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Enter topic e.g. P-104 failure history"
+              placeholder="Enter a topic to summarize"
               disabled={topicLoading}
             />
             <button

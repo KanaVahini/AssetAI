@@ -13,15 +13,10 @@ const api = axios.create({
 // Input:  { question: string, plant_name: string (optional) }
 // Output: { answer: string, sources: string[], chunks_used: number }
 export const askQuestion = async (question, plantName = null) => {
-  const response = await api.post("/ask", 
-    JSON.stringify({
-      question: question,
-      plant_name: plantName
-    }),
-    {
-      headers: { "Content-Type": "application/json" }
-    }
-  )
+  const response = await api.post("/ask", {
+    question: question,
+    plant_name: plantName
+  })
   return response.data
 }
 
@@ -58,6 +53,8 @@ export const getStatus = async () => {
 }
 
 // POST /rca
+// Input:  { equipment_tag: string }
+// Output: full RCA report object (equipment, severity, root_cause, etc.)
 export const runRCA = async (equipmentTag) => {
   const response = await api.post("/rca", {
     equipment_tag: equipmentTag
@@ -96,5 +93,21 @@ export const summarizeTopic = async (topic) => {
   const response = await api.post("/summary/document", {
     topic: topic
   })
+  return response.data
+}
+
+// GET /equipment/tags
+// Output: { tags: string[] } — the real equipment tags currently indexed,
+// used instead of hardcoding example tags anywhere in the UI.
+export const getEquipmentTags = async () => {
+  const response = await api.get("/equipment/tags")
+  return response.data
+}
+
+// GET /stats
+// Output: { documents_indexed: number, entities_extracted: number, knowledge_chunks: number }
+// Real corpus counts, used instead of hardcoding numbers in the Summary stat bar.
+export const getCorpusStats = async () => {
+  const response = await api.get("/stats")
   return response.data
 }

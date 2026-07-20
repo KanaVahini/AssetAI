@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getSafetyReport, checkEquipmentSafety } from '../services/api'
 import SourceCard from '../components/SourceCard'
 import Loader from '../components/Loader'
+import useEquipmentTags from '../hooks/useEquipmentTags'
 
 export default function Safety() {
   const [report, setReport] = useState(null)
@@ -12,6 +13,7 @@ export default function Safety() {
   const [checkResult, setCheckResult] = useState(null)
   const [checkLoading, setCheckLoading] = useState(false)
   const [checkError, setCheckError] = useState(null)
+  const { tags: quickTags } = useEquipmentTags(5)
 
   const loadReport = async () => {
     setReportLoading(true)
@@ -106,7 +108,7 @@ export default function Safety() {
               value={tag}
               onChange={e => setTag(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Enter equipment tag e.g. P-104, BL-07, V-22"
+              placeholder="Enter an equipment tag to check"
               disabled={checkLoading}
             />
             <button
@@ -118,18 +120,20 @@ export default function Safety() {
             </button>
           </div>
 
-          <div className="suggestions suggestions--static">
-            {['P-104', 'P-105', 'BL-07', 'V-22', 'HX-11'].map(t => (
-              <button
-                key={t}
-                className="suggestion-chip"
-                onClick={() => setTag(t)}
-                disabled={checkLoading}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
+          {quickTags.length > 0 && (
+            <div className="suggestions suggestions--static">
+              {quickTags.map(t => (
+                <button
+                  key={t}
+                  className="suggestion-chip"
+                  onClick={() => setTag(t)}
+                  disabled={checkLoading}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
 
           {checkLoading && (
             <div className="intel-card__loading intel-card__loading--inline">
