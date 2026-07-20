@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { runRCA } from '../services/api'
 import Gauge from '../components/Gauge'
+import useEquipmentTags from '../hooks/useEquipmentTags'
 
 const SEVERITY_META = {
   LOW:      { tone: 'low',      label: 'LOW' },
@@ -14,6 +15,7 @@ export default function RCA() {
   const [report, setReport] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const { tags: quickTags } = useEquipmentTags(4)
 
   const analyze = async () => {
     if (!tag.trim()) return
@@ -52,7 +54,7 @@ export default function RCA() {
             value={tag}
             onChange={e => setTag(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Enter equipment tag, e.g. P-104"
+            placeholder="Enter an equipment tag to investigate"
             disabled={loading}
           />
           <button
@@ -64,18 +66,20 @@ export default function RCA() {
           </button>
         </div>
 
-        <div className="rca__quick-tags">
-          {['P-104', 'P-105', 'BL-07', 'V-22'].map(t => (
-            <button
-              key={t}
-              className="suggestion-chip"
-              onClick={() => setTag(t)}
-              disabled={loading}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+        {quickTags.length > 0 && (
+          <div className="rca__quick-tags">
+            {quickTags.map(t => (
+              <button
+                key={t}
+                className="suggestion-chip"
+                onClick={() => setTag(t)}
+                disabled={loading}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {loading && (

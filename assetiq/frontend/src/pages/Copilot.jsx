@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { askQuestion } from '../services/api'
 import MessageBubble from '../components/MessageBubble'
 import Loader from '../components/Loader'
+import useEquipmentTags from '../hooks/useEquipmentTags'
 
 export default function Copilot() {
   const [messages, setMessages] = useState([
@@ -53,11 +54,14 @@ export default function Copilot() {
     }
   }
 
-  const suggestions = [
-    'Why did Pump P-104 fail in March 2024?',
-    'What is the lubrication interval for P-104?',
-    'What is the emergency shutdown procedure for P-104?'
+  const { tags } = useEquipmentTags(3)
+
+  const suggestionTemplates = [
+    t => `Why did ${t} fail recently?`,
+    t => `What is the maintenance history for ${t}?`,
+    t => `What is the emergency shutdown procedure for ${t}?`
   ]
+  const suggestions = tags.map((t, i) => suggestionTemplates[i % suggestionTemplates.length](t))
 
   return (
     <div className="copilot">
@@ -76,7 +80,7 @@ export default function Copilot() {
           {loading && <Loader />}
         </div>
 
-        {messages.length === 1 && (
+        {messages.length === 1 && suggestions.length > 0 && (
           <div className="suggestions">
             {suggestions.map((s, i) => (
               <button key={i} className="suggestion-chip" onClick={() => setInput(s)}>
