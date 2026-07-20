@@ -28,9 +28,14 @@ export const askQuestion = async (question, plantName = null) => {
 // POST /upload
 // Input:  FormData with file
 // Output: { message: string }
-export const uploadFile = async (file) => {
+// ✅ REPLACE old uploadFile with this
+export const uploadFiles = async (files) => {
   const formData = new FormData()
-  formData.append("file", file)
+  
+  // Append all files with same key "files"
+  files.forEach(file => {
+    formData.append("files", file)
+  })
 
   const response = await axios.post(`${BASE_URL}/upload`, formData, {
     headers: {

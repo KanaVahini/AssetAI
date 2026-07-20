@@ -5,18 +5,23 @@ import threading
 import json
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, UploadFile, File, BackgroundTasks
 from pydantic import BaseModel
 
+
 # ── Path setup ────────────────────────────────────────────────
-sys.path.append(os.path.abspath("backend/agents/copilot"))
-sys.path.append(os.path.abspath("backend/agents/rca"))
-sys.path.append(os.path.abspath("backend/rag"))
-sys.path.append(os.path.abspath("backend/ingestion"))
-sys.path.append(os.path.abspath("backend/entity_extraction"))
-sys.path.append(os.path.abspath("backend/knowledge_graph"))
+# ── Path setup ────────────────────────────────────────────────
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+sys.path.insert(0, os.path.join(BASE_DIR, "ingestion"))         # ← FIRST
+sys.path.insert(1, os.path.join(BASE_DIR, "entity_extraction"))
+sys.path.insert(2, os.path.join(BASE_DIR, "rag"))
+sys.path.insert(3, os.path.join(BASE_DIR, "agents/copilot"))
+sys.path.insert(4, os.path.join(BASE_DIR, "agents/rca"))
+sys.path.insert(5, os.path.join(BASE_DIR, "knowledge_graph"))   # ← LAST
+
 
 from agents.copilot import copilot_agent
 from agents.rca import rca_agent
@@ -42,14 +47,13 @@ class SafetyCheckRequest(BaseModel):
 # BACKGROUND PROCESSING — runs after file upload
 # ══════════════════════════════════════════════════════════════
 def process_new_document(file_path: str, plant_name: str = "Bharat Process Industries"):
-    """
-    Runs in background thread after a file is uploaded.
-    Processes the file through the full pipeline automatically.
-    """
     try:
+        for mod in ['schema', 'file_router', 'ocr_utils', 'enrichment']:
+            if mod in sys.modules:
+                del sys.modules[mod]
+
         print(f"\n🔄 Auto-processing: {os.path.basename(file_path)}")
 
-        # ── Step 1: Ingest ──────────────────────────────────
         from file_router import route_file
         result = route_file(file_path)
 
@@ -57,33 +61,54 @@ def process_new_document(file_path: str, plant_name: str = "Bharat Process Indus
             print(f"❌ Could not extract content from {file_path}")
             return
 
-        doc = {
-            "doc_id":      str(uuid.uuid4()),
-            "source_path": file_path,
-            "filename":    os.path.basename(file_path),
-            "doc_type":    result.get("doc_type"),
-            "plant_name":  plant_name,
-            "ingested_at": datetime.now(timezone.utc).isoformat(),
-            "pages":       result.get("pages", []),
-            "entities":    result.get("entities", []),
-            "metadata":    result.get("metadata", {}),
-            "is_duplicate": False
-        }
+        # ✅ result is already a complete doc — just add plant_name
+        doc = result
+        doc["plant_name"] = plant_name
+        doc["filename"] = os.path.basename(file_path)
+        doc["is_duplicate"] = False
 
-        # ── Step 2: Entity Extraction ───────────────────────
+        # ── Entity Extraction ───────────────────────
         from extractor import extract_entities_from_text
         from normalizer import normalize_all_entities
 
         full_text = " ".join([
-            p["text"] for p in doc["pages"] if p.get("text")
+            p.get("text", "") if isinstance(p, dict) else ""
+            for p in doc.get("pages", [])
         ])
 
         if full_text.strip():
             raw_entities = extract_entities_from_text(full_text)
-            doc["entities"] = normalize_all_entities(raw_entities)
-            print(f"  ✅ Extracted {len(doc['entities'])} entities")
 
-        # ── Step 3: Knowledge Graph ─────────────────────────
+            # Convert from {equipment_tags: [...], people: [...]} 
+            # to [{type: "equipment_tag", value: "P-104"}, ...]
+            entity_list = []
+
+            for tag in raw_entities.get("equipment_tags", []):
+                entity_list.append({"type": "equipment_tag", "value": tag})
+
+            for person in raw_entities.get("people", []):
+                entity_list.append({"type": "person", "value": person})
+
+            for failure in raw_entities.get("failure_modes", []):
+                entity_list.append({"type": "failure_mode", "value": failure})
+
+            for reg in raw_entities.get("regulations", []):
+                entity_list.append({"type": "regulatory_reference", "value": reg})
+
+            for date in raw_entities.get("dates", []):
+                entity_list.append({"type": "date", "value": date})
+
+            for loc in raw_entities.get("locations", []):
+                entity_list.append({"type": "location", "value": loc})
+
+            doc["entities"] = normalize_all_entities(entity_list)
+            print(f"  ✅ Extracted {len(doc['entities'])} entities")
+        else:
+            doc["entities"] = []
+            print("  ⚠ No text found for entity extraction")                       
+        
+
+        # ── Knowledge Graph ─────────────────────────
         try:
             from graph_builder import build_graph_for_doc
             build_graph_for_doc(doc)
@@ -91,20 +116,27 @@ def process_new_document(file_path: str, plant_name: str = "Bharat Process Indus
         except Exception as e:
             print(f"  ⚠ Graph update skipped: {e}")
 
-        # ── Step 4: Vector Store ────────────────────────────
+        # ── Vector Store ────────────────────────────
         from chroma_store import add_document
         add_document(doc)
         print("  ✅ Added to vector store")
 
-        # ── Step 5: Save to cleaned_documents.jsonl ─────────
-        output_path = "data/processed/cleaned_documents.jsonl"
+        # ── Save to cleaned_documents.jsonl ─────────
+        project_root = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
+        output_path = os.path.join(
+            project_root, "data/processed/cleaned_documents.jsonl"
+        )
         with open(output_path, "a") as f:
             f.write(json.dumps(doc) + "\n")
 
         print(f"✅ Auto-processing complete: {os.path.basename(file_path)}")
 
     except Exception as e:
+        import traceback
         print(f"❌ Auto-processing failed for {file_path}: {e}")
+        print(traceback.format_exc())
 
 
 # ══════════════════════════════════════════════════════════════
@@ -159,27 +191,36 @@ def run_rca(request: RCARequest):
 # ══════════════════════════════════════════════════════════════
 
 @router.post("/upload")
-def upload_file(
+def upload_files(
     background_tasks: BackgroundTasks,
-    file: UploadFile = File(...)
+    files: List[UploadFile] = File(...)
 ):
     """
-    Upload a new document.
-    Automatically processes it through the full pipeline in background.
-    User can ask questions about it after ~30 seconds.
+    Upload multiple documents at once.
+    Each file is automatically processed through the full pipeline in background.
     """
-    save_path = f"data/raw/{file.filename}"
-    with open(save_path, "wb") as f:
-        shutil.copyfileobj(file.file, f)
+    uploaded = []
+    failed = []
 
-    # Run full pipeline in background — don't make user wait
-    background_tasks.add_task(process_new_document, save_path)
+    for file in files:
+        try:
+            save_path = f"data/raw/{file.filename}"
+            with open(save_path, "wb") as f:
+                shutil.copyfileobj(file.file, f)
+
+            # Each file processed independently in background
+            background_tasks.add_task(process_new_document, save_path)
+            uploaded.append(file.filename)
+
+        except Exception as e:
+            failed.append({"filename": file.filename, "error": str(e)})
 
     return {
-        "message":    f"Uploaded {file.filename} successfully",
-        "status":     "processing",
-        "note":       "Document is being processed. You can ask questions about it in ~30 seconds.",
-        "filename":   file.filename
+        "uploaded": uploaded,
+        "failed": failed,
+        "total_uploaded": len(uploaded),
+        "status": "processing",
+        "note": f"{len(uploaded)} files uploaded. Processing in background. Ask questions in ~30 seconds per file."
     }
 
 
