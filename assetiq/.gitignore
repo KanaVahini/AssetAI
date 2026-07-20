@@ -1,10 +1,48 @@
+# ── Secrets ────────────────────────────────────────────────────
 .env
-__pycache__
+
+# ── Python ─────────────────────────────────────────────────────
+__pycache__/
 *.pyc
-node_modules
-data/chroma_db
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+env/
+
+# ── Node ───────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/build/
+
+# ── Data — raw files (too large, sensitive) ────────────────────
+data/raw/*
+!data/raw/.gitkeep
+
+# ── Data — keep processed files (teammates need these) ─────────
+# data/processed/ is committed so teammates don't re-run pipeline
+!data/processed/
+!data/processed/cleaned_documents.jsonl
+!data/processed/extracted_documents.jsonl
+!data/processed/ingested_output.jsonl
+
+# ── ChromaDB — large binary files ──────────────────────────────
+data/chroma_db/
+
+# ── SQLite ─────────────────────────────────────────────────────
 *.db
+
+# ── OS ─────────────────────────────────────────────────────────
 .DS_Store
-venv
-dist
-build
+Thumbs.db
+
+# ── IDE ────────────────────────────────────────────────────────
+.vscode/
+.idea/
+
+# ── Docker ─────────────────────────────────────────────────────
+# Keep docker files committed

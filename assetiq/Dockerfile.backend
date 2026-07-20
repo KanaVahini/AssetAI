@@ -1,0 +1,28 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install system dependencies with retry
+RUN apt-get update --fix-missing && \
+    apt-get install -y --fix-missing --no-install-recommends \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy entire project
+COPY . .
+
+# Create data directories
+RUN mkdir -p data/raw data/processed data/chroma_db
+
+CMD ["python", "startup.py"]

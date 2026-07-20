@@ -48,3 +48,4 @@ print("=" * 60 + "\n")
 
 # Step 6 — Start FastAPI server
 os.system(f"{sys.executable} backend/main.py")
+
