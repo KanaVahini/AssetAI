@@ -10,7 +10,9 @@ import pytesseract
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+tesseract_windows = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+if os.path.exists(tesseract_windows):
+    pytesseract.pytesseract.tesseract_cmd = tesseract_windows
     
 # Try to import PaddleOCR as fallback
 try:

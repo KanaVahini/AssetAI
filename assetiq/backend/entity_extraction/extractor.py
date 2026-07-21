@@ -1,3 +1,11 @@
+"""
+extractor.py
+-------------
+Entity extraction using Groq/Llama.
+Handles both standard schema pages (text field) and
+mixed_doc_extractor pages (prose field) via _page_text helper.
+"""
+
 import json
 import os
 import sys
@@ -8,7 +16,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+
 PROMPT = """
 You are an industrial document analyst.
 Read the text below and extract these entities.
@@ -34,10 +45,30 @@ Rules:
 TEXT:
 """
 
+
+def _page_text(page):
+    """
+    Normalizes both page shapes into a plain-text string.
+
+    Pages built via schema.make_page() (pdf_extractor, ocr_extractor,
+    csv_extractor, email_extractor) carry a "text" string.
+
+    Pages built via mixed_doc_extractor.process_page() have NO "text" key --
+    content lives in "prose" (a list of strings), with "tables" and "figures"
+    as separate structures. Without this helper, those pages produce empty
+    text and get skipped entirely.
+    """
+    if page.get("text"):
+        return page["text"]
+    if page.get("prose"):
+        return " ".join(page["prose"])
+    return ""
+
+
 def extract_entities_from_text(text):
-    # Take first 3000 chars to avoid token limits
+    """Call Groq LLM to extract entities from text. Returns a dict."""
     short_text = text[:3000]
-    
+
     try:
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -47,11 +78,11 @@ def extract_entities_from_text(text):
             }],
             temperature=0
         )
-        
+
         raw = response.choices[0].message.content
         raw = raw.replace("```json", "").replace("```", "").strip()
         return json.loads(raw)
-        
+
     except Exception as e:
         print(f"    ⚠ Extraction failed: {e}")
         return {
@@ -65,76 +96,60 @@ def extract_entities_from_text(text):
 
 
 def run_extraction(
-    input_path = os.path.join(
-    BASE_DIR,
-    "..",
-    "..",
-    "data",
-    "processed",
-    "ingested_output.jsonl",
-),
-   output_path = os.path.join(
-    BASE_DIR,
-    "..",
-    "..",
-    "data",
-    "processed",
-    "extracted_documents.jsonl",
-)
-
+    input_path=os.path.join(PROJECT_ROOT, "data", "processed", "ingested_output.jsonl"),
+    output_path=os.path.join(PROJECT_ROOT, "data", "processed", "extracted_documents.jsonl")
 ):
     with open(input_path) as f:
         documents = [json.loads(line) for line in f]
-    
+
     results = []
-    
+
     for doc in documents:
         print(f"Extracting: {doc['filename']}")
-        
-        # Combine all page texts
+
+        # Handles both "text" (standard schema) and "prose" (mixed_doc) page shapes
         full_text = " ".join([
-            page["text"]
+            _page_text(page)
             for page in doc.get("pages", [])
-            if page.get("text")
+            if _page_text(page)
         ])
-        
+
         if not full_text.strip():
             print(f"  ⚠ No text found, skipping")
             results.append(doc)
             continue
-        
+
         # Extract entities using Groq
         entities = extract_entities_from_text(full_text)
-        
-        # Convert to standard format
+
+        # Convert to standard list-of-dicts format
         doc["entities"] = []
-        
+
         for tag in entities.get("equipment_tags", []):
             doc["entities"].append({"type": "equipment_tag", "value": tag})
-        
+
         for person in entities.get("people", []):
             doc["entities"].append({"type": "person", "value": person})
-        
+
         for failure in entities.get("failure_modes", []):
             doc["entities"].append({"type": "failure_mode", "value": failure})
-        
+
         for reg in entities.get("regulations", []):
             doc["entities"].append({"type": "regulatory_reference", "value": reg})
-        
+
         for date in entities.get("dates", []):
             doc["entities"].append({"type": "date", "value": date})
-        
+
         for loc in entities.get("locations", []):
             doc["entities"].append({"type": "location", "value": loc})
-        
+
         print(f"  ✅ {len(doc['entities'])} entities found")
         results.append(doc)
-    
-    # Save output
+
     with open(output_path, "w") as f:
         for doc in results:
             f.write(json.dumps(doc) + "\n")
-    
+
     print(f"\n✅ Done! Saved to {output_path}")
 
 

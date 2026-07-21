@@ -11,6 +11,7 @@ from fastapi import APIRouter, UploadFile, File, BackgroundTasks
 from pydantic import BaseModel
 
 
+
 # ── Path setup ────────────────────────────────────────────────
 # ── Path setup ────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -61,54 +62,62 @@ def process_new_document(file_path: str, plant_name: str = "Bharat Process Indus
             print(f"❌ Could not extract content from {file_path}")
             return
 
-        # ✅ result is already a complete doc — just add plant_name
-        doc = result
-        doc["plant_name"] = plant_name
-        doc["filename"] = os.path.basename(file_path)
-        doc["is_duplicate"] = False
+        # ── Normalize result to standard doc format ──────────
+        # mixed_doc_extractor returns {doc_type, source_file, pages}
+        # pdf_extractor/csv_extractor return full doc with doc_id
+        # We need to ensure doc_id always exists
+        import uuid
+        from datetime import datetime, timezone
 
-        # ── Entity Extraction ───────────────────────
+        if "doc_id" not in result:
+            # mixed_doc_extractor result — add missing fields
+            result["doc_id"]      = str(uuid.uuid4())
+            result["filename"]    = os.path.basename(file_path)
+            result["source_path"] = file_path
+            result["plant_name"]  = plant_name
+            result["ingested_at"] = datetime.now(timezone.utc).isoformat()
+            result["entities"]    = []
+            result["is_duplicate"] = False
+        else:
+            # Standard result — just add plant_name and filename
+            result["plant_name"]  = plant_name
+            result["filename"]    = os.path.basename(file_path)
+            result["is_duplicate"] = False
+
+        doc = result
+
+        # ── Entity Extraction ────────────────────────────────
         from extractor import extract_entities_from_text
         from normalizer import normalize_all_entities
 
+        # Handle both text and prose page shapes
         full_text = " ".join([
-            p.get("text", "") if isinstance(p, dict) else ""
+            p.get("text", "") or " ".join(p.get("prose", []))
             for p in doc.get("pages", [])
+            if p.get("text") or p.get("prose")
         ])
 
         if full_text.strip():
             raw_entities = extract_entities_from_text(full_text)
-
-            # Convert from {equipment_tags: [...], people: [...]} 
-            # to [{type: "equipment_tag", value: "P-104"}, ...]
             entity_list = []
-
             for tag in raw_entities.get("equipment_tags", []):
                 entity_list.append({"type": "equipment_tag", "value": tag})
-
             for person in raw_entities.get("people", []):
                 entity_list.append({"type": "person", "value": person})
-
             for failure in raw_entities.get("failure_modes", []):
                 entity_list.append({"type": "failure_mode", "value": failure})
-
             for reg in raw_entities.get("regulations", []):
                 entity_list.append({"type": "regulatory_reference", "value": reg})
-
             for date in raw_entities.get("dates", []):
                 entity_list.append({"type": "date", "value": date})
-
             for loc in raw_entities.get("locations", []):
                 entity_list.append({"type": "location", "value": loc})
-
             doc["entities"] = normalize_all_entities(entity_list)
             print(f"  ✅ Extracted {len(doc['entities'])} entities")
         else:
-            doc["entities"] = []
-            print("  ⚠ No text found for entity extraction")                       
-        
+            print(f"  ⚠ No text found for entity extraction")
 
-        # ── Knowledge Graph ─────────────────────────
+        # ── Knowledge Graph ──────────────────────────────────
         try:
             from graph_builder import build_graph_for_doc
             build_graph_for_doc(doc)
@@ -116,12 +125,12 @@ def process_new_document(file_path: str, plant_name: str = "Bharat Process Indus
         except Exception as e:
             print(f"  ⚠ Graph update skipped: {e}")
 
-        # ── Vector Store ────────────────────────────
+        # ── Vector Store ─────────────────────────────────────
         from chroma_store import add_document
         add_document(doc)
         print("  ✅ Added to vector store")
 
-        # ── Save to cleaned_documents.jsonl ─────────
+        # ── Save to cleaned_documents.jsonl ──────────────────
         project_root = os.path.dirname(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         )
@@ -337,3 +346,31 @@ def summarize_topic(request: QueryRequest):
         plant_name=request.plant_name
     )
     return result
+
+
+@router.get("/equipment/tags")
+def get_equipment_tags():
+    """Returns list of all equipment tags from Neo4j."""
+    try:
+        from neo4j_connector import run_query
+        results = run_query("MATCH (e:Equipment) RETURN e.tag AS tag ORDER BY e.tag")
+        tags = [r["tag"] for r in results if r["tag"]]
+        return {"tags": tags}
+    except Exception as e:
+        return {"tags": [], "error": str(e)}
+
+@router.get("/stats")
+def get_stats():
+    """Returns basic stats about indexed documents."""
+    import json, os
+    stats = {"documents": 0, "entities": 0, "chunks": 0}
+    try:
+        path = "data/processed/cleaned_documents.jsonl"
+        if os.path.exists(path):
+            with open(path) as f:
+                docs = [json.loads(line) for line in f]
+            stats["documents"] = len(docs)
+            stats["entities"] = sum(len(d.get("entities", [])) for d in docs)
+    except Exception:
+        pass
+    return stats    
