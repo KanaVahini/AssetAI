@@ -43,3 +43,4 @@ EDGE_TYPES = [
     "REFERENCES",       # Document → Document
     "LOCATED_IN",       # Equipment → Location
 ]
+
