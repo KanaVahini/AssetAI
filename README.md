@@ -43,6 +43,33 @@ docker-compose up --build
 
 ---
 
+### 4. View the Knowledge Graph
+
+Once all the containers are running:
+
+1. Open the Neo4j Browser:
+   ```
+   http://localhost:7474
+   ```
+
+2. Log in using the following credentials:
+
+   ```text
+   Username: neo4j
+   Password: password123
+   ```
+
+3. After logging in, run the following Cypher query to visualize the generated knowledge graph:
+
+   ```cypher
+   MATCH p=(n)-[r]->(m)
+   RETURN p;
+   ```
+
+   This will display all nodes and relationships extracted from the processed documents.
+
+> **Note:** The knowledge graph will only contain data after documents have been processed through the application. If no documents have been uploaded yet, the graph will be empty.
+
 ## Access
 
 | Service       | URL                        | Description                                                                                                             |
