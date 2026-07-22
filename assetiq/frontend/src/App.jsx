@@ -6,6 +6,7 @@ import Upload from './pages/Upload'
 import RCA from './pages/RCA'
 import Safety from './pages/Safety'
 import Summary from './pages/Summary'
+import Graph from './pages/Graph'
 import Sidebar from './components/Sidebar'
 import './styles/app.css'
 
@@ -40,6 +41,7 @@ function AnimatedRoutes() {
         <Route path="/rca" element={<Page><RCA /></Page>} />
         <Route path="/safety" element={<Page><Safety /></Page>} />
         <Route path="/summary" element={<Page><Summary /></Page>} />
+        <Route path="/graph" element={<Page><Graph /></Page>} />
       </Routes>
     </AnimatePresence>
   )

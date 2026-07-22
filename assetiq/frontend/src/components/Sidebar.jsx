@@ -19,6 +19,7 @@ export default function Sidebar() {
     { path: '/rca', label: 'RCA', icon: '⚡' },
     { path: '/safety', label: 'Safety', icon: '⛨' },
     { path: '/summary', label: 'Summary', icon: '▤' },
+    { path: '/graph', label: 'Graph', icon: '◉' },
   ]
 
   return (

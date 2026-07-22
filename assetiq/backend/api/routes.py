@@ -374,3 +374,52 @@ def get_stats():
     except Exception:
         pass
     return stats    
+
+
+# ══════════════════════════════════════════════════════════════
+# GRAPH — Knowledge graph data for frontend visualization
+# ══════════════════════════════════════════════════════════════
+
+@router.get("/graph")
+def get_graph():
+    """
+    Returns nodes + edges from the knowledge graph for visualization.
+    Output: { nodes: list, edges: list }
+    """
+    try:
+        from neo4j_connector import run_query
+        results = run_query("""
+            MATCH (n)-[r]->(m)
+            RETURN n, r, m
+            LIMIT 200
+        """)
+
+        nodes = {}
+        edges = []
+
+        for record in results:
+            n, m, r = record["n"], record["m"], record["r"]
+
+            n_id = n.element_id
+            m_id = m.element_id
+
+            nodes[n_id] = {
+                "id": n_id,
+                "label": list(n.labels)[0] if n.labels else "Node",
+                "properties": dict(n)
+            }
+            nodes[m_id] = {
+                "id": m_id,
+                "label": list(m.labels)[0] if m.labels else "Node",
+                "properties": dict(m)
+            }
+            edges.append({
+                "source": n_id,
+                "target": m_id,
+                "type": r.type
+            })
+
+        return {"nodes": list(nodes.values()), "edges": edges}
+
+    except Exception as e:
+        return {"nodes": [], "edges": [], "error": str(e)}
