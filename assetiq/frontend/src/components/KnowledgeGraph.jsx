@@ -75,6 +75,7 @@ export default function KnowledgeGraph() {
   const fgRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [hoverNode, setHoverNode] = useState(null);
+  const [selectedNode, setSelectedNode] = useState(null);
 
   // This effect now attaches on the very first paint, because the
   // container div below is ALWAYS rendered (loading/error/empty states
@@ -255,24 +256,27 @@ export default function KnowledgeGraph() {
   const showEmpty = !loading && !error && graphData.nodes.length === 0;
   const showGraph = !loading && !error && graphData.nodes.length > 0;
 
-  // Highlight connections for any hovered node (no degree restriction).
-  const highlightActive = Boolean(hoverNode);
+  // A click pins a node (persists until clicked again); otherwise the
+  // currently hovered node drives the panel. Either way there is only
+  // ever ONE active node and ONE panel — no separate hover vs. click UI.
+  const activeNode = selectedNode || hoverNode;
+  const highlightActive = Boolean(activeNode);
 
-  const isLinkOnHoverNode = (link) => {
+  const isLinkOnActiveNode = (link) => {
     if (!highlightActive) return false;
     const sourceId = typeof link.source === "object" ? link.source.id : link.source;
     const targetId = typeof link.target === "object" ? link.target.id : link.target;
-    return sourceId === hoverNode.id || targetId === hoverNode.id;
+    return sourceId === activeNode.id || targetId === activeNode.id;
   };
 
-  // Neighbor nodes of the hovered node — drives both the enlarged
-  // rendering on the canvas and the name list shown beside the graph.
+  // Neighbor nodes of the active node — drives both the enlarged
+  // rendering on the canvas and the single name list shown beside the graph.
   const connectedNodes = highlightActive
     ? graphData.links
-        .filter(isLinkOnHoverNode)
+        .filter(isLinkOnActiveNode)
         .map((link) => {
           const sourceId = typeof link.source === "object" ? link.source.id : link.source;
-          const otherRef = sourceId === hoverNode.id ? link.target : link.source;
+          const otherRef = sourceId === activeNode.id ? link.target : link.source;
           const otherId = typeof otherRef === "object" ? otherRef.id : otherRef;
           return typeof otherRef === "object"
             ? otherRef
@@ -302,7 +306,10 @@ export default function KnowledgeGraph() {
           linkDirectionalArrowLength={0}
           linkLabel={(link) => link.type}
           onNodeHover={(node) => setHoverNode(node)}
-          linkCanvasObjectMode={(link) => (isLinkOnHoverNode(link) ? "replace" : undefined)}
+          onNodeClick={(node) =>
+            setSelectedNode((prev) => (prev && prev.id === node.id ? null : node))
+          }
+          linkCanvasObjectMode={(link) => (isLinkOnActiveNode(link) ? "replace" : undefined)}
           linkCanvasObject={(link, ctx) => {
             const start = link.source;
             const end = link.target;
@@ -311,7 +318,7 @@ export default function KnowledgeGraph() {
             // Orient the gradient outward from the hovered node so the
             // color grading reads as "flowing" from the node being
             // inspected toward each of its connections.
-            const fromHover = start.id === hoverNode.id;
+            const fromHover = start.id === activeNode.id;
             const from = fromHover ? start : end;
             const to = fromHover ? end : start;
 
@@ -334,7 +341,7 @@ export default function KnowledgeGraph() {
           nodeRelSize={1}
           nodeCanvasObject={(node, ctx, globalScale) => {
             const isHoverOrConnected =
-              highlightActive && (node.id === hoverNode.id || connectedNodeIds.has(node.id));
+              highlightActive && (node.id === activeNode.id || connectedNodeIds.has(node.id));
             const radius = (node.radius || BASE_RADIUS) * (isHoverOrConnected ? 1.7 : 1);
             const color = LABEL_COLORS[node.label] || DEFAULT_NODE_COLOR;
 
@@ -413,14 +420,17 @@ export default function KnowledgeGraph() {
             pointerEvents: "none",
           }}
         >
-          Hover any node to see its links highlighted with a color
-          gradient, its connected nodes enlarged, and a list of those
-          connections here on the right.
+          Hover any node to preview its links highlighted with a color
+          gradient, connected nodes enlarged, and a list of connections
+          on the right. Click a node to pin that panel open; click the
+          same node again to close it.
         </div>
       )}
 
-      {/* Connections panel — shown beside the graph while a qualifying
-          node (fewer than 5 connections) is hovered */}
+      {/* Single connections panel — shown while any node is hovered OR
+          clicked. A click pins it open (activeNode stays the clicked
+          node even after the mouse leaves); clicking the same node
+          again clears the selection and the panel closes. */}
       {showGraph && highlightActive && (
         <div
           style={{
@@ -439,8 +449,27 @@ export default function KnowledgeGraph() {
             overflowY: "auto",
           }}
         >
-          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
-            {hoverNode.name}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+              {activeNode.name}
+            </div>
+            {selectedNode && (
+              <button
+                onClick={() => setSelectedNode(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#8FAEAC",
+                  cursor: "pointer",
+                  fontSize: 14,
+                  lineHeight: 1,
+                  padding: 0,
+                }}
+                aria-label="Close details"
+              >
+                ×
+              </button>
+            )}
           </div>
           <div style={{ fontSize: 10, color: "#8FAEAC", marginBottom: 10 }}>
             {connectedNodes.length} connection{connectedNodes.length === 1 ? "" : "s"}
