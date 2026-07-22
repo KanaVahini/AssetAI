@@ -74,6 +74,7 @@ export default function KnowledgeGraph() {
   const containerRef = useRef(null);
   const fgRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [hoverNode, setHoverNode] = useState(null);
 
   // This effect now attaches on the very first paint, because the
   // container div below is ALWAYS rendered (loading/error/empty states
@@ -254,6 +255,34 @@ export default function KnowledgeGraph() {
   const showEmpty = !loading && !error && graphData.nodes.length === 0;
   const showGraph = !loading && !error && graphData.nodes.length > 0;
 
+  // Highlight connections for any hovered node (no degree restriction).
+  const highlightActive = Boolean(hoverNode);
+
+  const isLinkOnHoverNode = (link) => {
+    if (!highlightActive) return false;
+    const sourceId = typeof link.source === "object" ? link.source.id : link.source;
+    const targetId = typeof link.target === "object" ? link.target.id : link.target;
+    return sourceId === hoverNode.id || targetId === hoverNode.id;
+  };
+
+  // Neighbor nodes of the hovered node — drives both the enlarged
+  // rendering on the canvas and the name list shown beside the graph.
+  const connectedNodes = highlightActive
+    ? graphData.links
+        .filter(isLinkOnHoverNode)
+        .map((link) => {
+          const sourceId = typeof link.source === "object" ? link.source.id : link.source;
+          const otherRef = sourceId === hoverNode.id ? link.target : link.source;
+          const otherId = typeof otherRef === "object" ? otherRef.id : otherRef;
+          return typeof otherRef === "object"
+            ? otherRef
+            : graphData.nodes.find((n) => n.id === otherId);
+        })
+        .filter(Boolean)
+    : [];
+
+  const connectedNodeIds = new Set(connectedNodes.map((n) => n.id));
+
   return (
     <div ref={containerRef} style={containerStyle}>
       {showLoading && <div style={overlayStyle}>Loading knowledge graph…</div>}
@@ -272,6 +301,31 @@ export default function KnowledgeGraph() {
           linkCurvature={0.15}
           linkDirectionalArrowLength={0}
           linkLabel={(link) => link.type}
+          onNodeHover={(node) => setHoverNode(node)}
+          linkCanvasObjectMode={(link) => (isLinkOnHoverNode(link) ? "replace" : undefined)}
+          linkCanvasObject={(link, ctx) => {
+            const start = link.source;
+            const end = link.target;
+            if (typeof start !== "object" || typeof end !== "object") return;
+
+            // Orient the gradient outward from the hovered node so the
+            // color grading reads as "flowing" from the node being
+            // inspected toward each of its connections.
+            const fromHover = start.id === hoverNode.id;
+            const from = fromHover ? start : end;
+            const to = fromHover ? end : start;
+
+            const gradient = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
+            gradient.addColorStop(0, "#E0A24E");
+            gradient.addColorStop(1, "#4FBFA8");
+
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.stroke();
+          }}
           d3AlphaDecay={0.024}
           d3VelocityDecay={0.42}
           cooldownTicks={200}
@@ -279,13 +333,21 @@ export default function KnowledgeGraph() {
           onEngineStop={handleEngineStop}
           nodeRelSize={1}
           nodeCanvasObject={(node, ctx, globalScale) => {
-            const radius = node.radius || BASE_RADIUS;
+            const isHoverOrConnected =
+              highlightActive && (node.id === hoverNode.id || connectedNodeIds.has(node.id));
+            const radius = (node.radius || BASE_RADIUS) * (isHoverOrConnected ? 1.7 : 1);
             const color = LABEL_COLORS[node.label] || DEFAULT_NODE_COLOR;
 
             ctx.beginPath();
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
             ctx.fillStyle = node.isHub ? "#f79767" : color;
             ctx.fill();
+
+            if (isHoverOrConnected) {
+              ctx.lineWidth = 2 / globalScale;
+              ctx.strokeStyle = "#EDF4F2";
+              ctx.stroke();
+            }
 
             if (node.isHub) {
               ctx.lineWidth = 2 / globalScale;
@@ -329,6 +391,82 @@ export default function KnowledgeGraph() {
             ctx.fill();
           }}
         />
+      )}
+
+      {/* Legend — explains the hover behavior directly on the page */}
+      {showGraph && (
+        <div
+          style={{
+            position: "absolute",
+            top: 16,
+            left: 16,
+            zIndex: 3,
+            maxWidth: 320,
+            padding: "10px 14px",
+            borderRadius: 6,
+            background: "rgba(16, 34, 46, 0.82)",
+            border: "1px solid rgba(178, 212, 208, 0.26)",
+            color: "#8FAEAC",
+            fontFamily: "monospace",
+            fontSize: 11,
+            lineHeight: 1.5,
+            pointerEvents: "none",
+          }}
+        >
+          Hover any node to see its links highlighted with a color
+          gradient, its connected nodes enlarged, and a list of those
+          connections here on the right.
+        </div>
+      )}
+
+      {/* Connections panel — shown beside the graph while a qualifying
+          node (fewer than 5 connections) is hovered */}
+      {showGraph && highlightActive && (
+        <div
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            bottom: 16,
+            width: 240,
+            zIndex: 3,
+            padding: "14px 16px",
+            borderRadius: 6,
+            background: "rgba(16, 34, 46, 0.9)",
+            border: "1px solid rgba(178, 212, 208, 0.26)",
+            color: "#EDF4F2",
+            fontFamily: "monospace",
+            overflowY: "auto",
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+            {hoverNode.name}
+          </div>
+          <div style={{ fontSize: 10, color: "#8FAEAC", marginBottom: 10 }}>
+            {connectedNodes.length} connection{connectedNodes.length === 1 ? "" : "s"}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, boxSizing: "border-box" }}>
+            {connectedNodes.map((n) => (
+              <div
+                key={n.id}
+                style={{
+                  fontSize: 12,
+                  padding: "4px 8px",
+                  borderRadius: 4,
+                  background: "rgba(224, 162, 78, 0.12)",
+                  color: "#EDF4F2",
+                  boxSizing: "border-box",
+                  width: "100%",
+                  whiteSpace: "normal",
+                  overflowWrap: "break-word",
+                  wordBreak: "break-word",
+                }}
+              >
+                {n.name}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
