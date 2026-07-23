@@ -34,7 +34,6 @@ Add your Groq API key to the `.env` file:
 GROQ_API_KEY=your_api_key
 ```
 
-
 ### 3. Start the project
 
 ```bash
@@ -48,6 +47,7 @@ docker-compose up --build
 Once all the containers are running:
 
 1. Open the Neo4j Browser:
+
    ```
    http://localhost:7474
    ```
@@ -84,13 +84,15 @@ Once all the containers are running:
 
 ### Technical Documentation
 
-> Add the link to the technical documentation PDF here.
+**Technical Documentation PDF:**
+https://drive.google.com/file/d/1bbavMC9gF2-SLyNqABpalS7pzlyT008d/view?usp=sharing
 
 ### Project Presentation
 
-> Add the link to the project presentation (PPT) here.
+**Project Presentation Deck:**
+https://docs.google.com/presentation/d/1IlCq9q6FNqPda7JIR8igH69LWLBqo5jQ/edit?usp=sharing&ouid=109909952726608552417&rtpof=true&sd=true
 
-The presentation may include:
+The presentation includes:
 
 * Problem Statement
 * Proposed Solution
